@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ramadan Food Ordering</title>
+
+  <style>
+    :root{
+      --bg1:#fff8e1;
+      --bg2:#e6fff7;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#475569;
+      --brand:#00695c;
+      --brand2:#004d40;
+      --accent:#25D366;
+      --shadow:0 12px 30px rgba(0,0,0,.12);
+      --border:1px solid rgba(0,0,0,.10);
+      --radius:16px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 500px at 10% 0%, var(--bg2), transparent),
+                  radial-gradient(1200px 500px at 90% 0%, #fff0d6, transparent),
+                  var(--bg1);
+    }
+
+    /* Header */
+    header{
+      background: linear-gradient(120deg, var(--brand), var(--brand2));
+      color:#fff;
+      padding: 26px 16px;
+      text-align:center;
+      position:sticky;
+      top:0;
+      z-index:10;
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+    header h1{ margin:0 0 6px 0; font-size:26px; }
+    header p{ margin:0; opacity:.95; }
+
+    /* Layout */
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+      display:grid;
+      gap: 14px;
+    }
+    @media(min-width: 900px){
+      .wrap{ grid-template-columns: 1.35fr .65fr; }
+    }
+
+    /* Cards */
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: var(--border);
+      padding: 14px;
+    }
+    .card h2{
+      margin:0 0 6px 0;
+      font-size:18px;
+    }
+    .sub{
+      margin:0 0 12px 0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin: 10px 0 14px;
+    }
+    .tab{
+      border: var(--border);
+      background:#fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 800;
+      transition:.2s;
+    }
+    .tab:hover{ transform: translateY(-1px); }
+    .tab.active{
+      background: #eafff3;
+      border-color: rgba(37,211,102,.55);
+      color: #0b3b22;
+      box-shadow: 0 8px 18px rgba(37,211,102,.18);
+    }
+
+    /* Menu sections */
+    .sectionTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      margin: 14px 0 8px;
+    }
+    .sectionTitle h3{ margin:0; font-size:16px; }
+    .sectionTitle span{ color:var(--muted); font-size:12px; }
+
+    .items{
+      display:grid;
+      gap:10px;
+    }
+    @media(min-width: 680px){
+      .items{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .item{
+      border: var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      background: linear-gradient(180deg, #ffffff, #fbfffe);
+      transition:.15s;
+    }
+    .item:hover{ transform: translateY(-1px); }
+
+    .info h4{ margin:0 0 4px 0; font-size:15px; }
+    .info p{ margin:0; font-size:12px; color:var(--muted); }
+
+    .qty{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 8px;
+      border-radius: 14px;
+      min-width: 128px;
+    }
+    .qbtn{
+      border:none;
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-size: 18px;
+      font-weight: 900;
+      color:#fff;
+      background: linear-gradient(120deg, var(--brand2), var(--brand));
+      transition:.15s;
+    }
+    .qbtn:hover{ transform: scale(1.03); }
+    .qbtn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
+
+    .qnum{
+      width: 30px;
+      text-align:center;
+      font-weight: 900;
+    }
+
+    /* Summary */
+    .row{
+      display:flex;
+      justify-content:space-between;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .row strong{ font-size: 15px; }
+
+    label{
+      display:block;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    input, textarea{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: var(--border);
+      outline:none;
+      font-size: 14px;
+      background:#fff;
+    }
+    textarea{ min-height: 90px; resize:vertical; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .btn{
+      border:none;
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 14px;
+      transition:.15s;
+    }
+    .btn:hover{ transform: translateY(-1px); }
+    .btn.primary{
+      background: linear-gradient(120deg, #1da851, var(--accent));
+      color:#fff;
+      flex:1;
+      min-width: 220px;
+    }
+    .btn.secondary{
+      background:#e2e8f0;
+      color:#0f172a;
+    }
+    .btn.danger{
+      background:#ef4444;
+      color:#fff;
+    }
+
+    .note{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    footer{
+      text-align:center;
+      padding: 14px;
+      margin-top: 10px;
+      color:#fff;
+      background: linear-gradient(120deg, var(--brand), var(--brand2));
+    }
+    .tiny{ font-size: 12px; opacity:.95; }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌙 Ramadan Food Ordering</h1>
+  <p>Iftar • Dinner • Suhur — select quantity & order on WhatsApp</p>
+</header>
+
+<div class="wrap">
+
+  <!-- LEFT: MENU -->
+  <div class="card">
+    <h2 id="mealTitle">Iftar Menu</h2>
+    <p class="sub">Choose a meal time, then press + / − to set quantities.</p>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-meal="iftar">Iftar</button>
+      <button class="tab" data-meal="dinner">Dinner</button>
+      <button class="tab" data-meal="suhur">Suhur</button>
+    </div>
+
+    <div id="menuArea"></div>
+  </div>
+
+  <!-- RIGHT: SUMMARY -->
+  <div class="card">
+    <h2>Order Summary</h2>
+    <div class="row"><span>Meal Time</span><strong id="mealName">Iftar</strong></div>
+    <div class="row"><span>Total Items</span><strong id="totalItems">0</strong></div>
+
+    <label>Your Name</label>
+    <input id="custName" placeholder="Enter your name" />
+
+    <label>Phone Number</label>
+    <input id="custPhone" placeholder="Enter phone number" />
+
+    <label>Address</label>
+    <textarea id="custAddress" placeholder="Enter delivery address"></textarea>
+
+    <label>Note (optional)</label>
+    <input id="custNote" placeholder="Eg: less spicy / extra gravy" />
+
+    <div class="actions">
+      <button class="btn primary" id="sendWhatsApp">Send Order on WhatsApp</button>
+      <button class="btn secondary" id="copyText">Copy Order Text</button>
+      <button class="btn danger" id="clearAll">Clear</button>
+    </div>
+
+    <div class="note">
+      ✅ No Google Form needed. Customer order goes directly to your WhatsApp.<br/>
+      🔧 Change your WhatsApp number in the code (one line).
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="tiny">Ramadan Mubarak 🌙 • Hosted on GitHub Pages</div>
+</footer>
+
+<script>
+  // ✅ CHANGE THIS to your WhatsApp number (country code + number, no spaces)
+  // Example India: "919876543210"
+  const YOUR_WHATSAPP_NUMBER = "9567717335";
+
+  // MENU:
+  // ✅ IFTAR = cut fruits + juice + snacks
+  // ✅ DINNER and SUHUR = same menu (breads + curries + fresh juice)
+  const DINNER_MENU = {
+    "Breads": [
+      { id:"appam", name:"Appam", desc:"Soft Kerala appam" },
+      { id:"chapati", name:"Chapati", desc:"Fresh homemade chapati" },
+      { id:"porotta", name:"Porotta", desc:"Kerala style flaky porotta" },
+      { id:"idiyappam", name:"Idiyappam", desc:"Soft steamed string hoppers" },
+      { id:"puttu", name:"Puttu", desc:"Traditional Kerala puttu" },
+    ],
+    "Curries": [
+      { id:"chickencurry", name:"Chicken Curry", desc:"Spicy homemade chicken curry" },
+      { id:"butterchicken", name:"Butter Chicken", desc:"Creamy butter chicken masala" },
+      { id:"beefcurry", name:"Beef Curry", desc:"Kerala style beef curry" },
+      { id:"eggcurry", name:"Egg Curry", desc:"Traditional egg masala curry" },
+    ],
+    "Drinks": [
+      { id:"freshjuice", name:"Fresh Juice", desc:"Mango / Orange / Lime & more" }
+    ]
+  };
+
+  const MENU = {
+    iftar: {
+      "Cut Fruits": [
+        { id:"cut_apple", name:"Cut Apple", desc:"Fresh apple slices" },
+        { id:"cut_banana", name:"Cut Banana", desc:"Fresh banana slices" },
+        { id:"cut_watermelon", name:"Watermelon", desc:"Fresh watermelon cubes" },
+        { id:"cut_mix", name:"Mixed Fruit Bowl", desc:"Apple + banana + watermelon mix" },
+      ],
+      "Juice": [
+        { id:"juice_mango", name:"Mango Juice", desc:"Fresh mango juice" },
+        { id:"juice_orange", name:"Orange Juice", desc:"Fresh orange juice" },
+        { id:"juice_lime", name:"Lime Juice", desc:"Fresh lime juice" },
+      ],
+      "Snacks": [
+        { id:"snack_samosa", name:"Samosa", desc:"Crispy & tasty" },
+        { id:"snack_cutlet", name:"Cutlet", desc:"Veg / chicken cutlet" },
+        { id:"snack_pakora", name:"Pakora", desc:"Evening snack special" },
+        { id:"snack_roll", name:"Roll", desc:"Chicken / veg roll" },
+      ]
+    },
+
+    dinner: DINNER_MENU,
+
+    // ✅ SAME as dinner
+    suhur: DINNER_MENU
+  };
+
+  let currentMeal = "iftar";
+  const cart = {}; // itemId -> qty
+
+  const tabs = document.getElementById("tabs");
+  const menuArea = document.getElementById("menuArea");
+  const mealName = document.getElementById("mealName");
+  const mealTitle = document.getElementById("mealTitle");
+  const totalItems = document.getElementById("totalItems");
+
+  function titleCase(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function setMeal(meal){
+    currentMeal = meal;
+    mealName.textContent = titleCase(meal);
+    mealTitle.textContent = `${titleCase(meal)} Menu`;
+    renderMenu();
+    updateSummary();
+  }
+
+  function inc(id){
+    cart[id] = (cart[id] || 0) + 1;
+    renderMenu();
+    updateSummary();
+  }
+
+  function dec(id){
+    const next = Math.max(0, (cart[id] || 0) - 1);
+    if(next === 0) delete cart[id];
+    else cart[id] = next;
+    renderMenu();
+    updateSummary();
+  }
+
+  function getTotalCount(){
+    return Object.values(cart).reduce((a,b)=>a+b,0);
+  }
+
+  function renderMenu(){
+    const data = MENU[currentMeal];
+    let html = "";
+
+    for(const section in data){
+      const items = data[section];
+      html += `
+        <div class="sectionTitle">
+          <h3>${section}</h3>
+          <span>${items.length} items</span>
+        </div>
+        <div class="items">
+      `;
+
+      for(const it of items){
+        const q = cart[it.id] || 0;
+        html += `
+          <div class="item">
+            <div class="info">
+              <h4>${it.name}</h4>
+              <p>${it.desc}</p>
+            </div>
+            <div class="qty">
+              <button class="qbtn" ${q===0 ? "disabled": ""} onclick="dec('${it.id}')">−</button>
+              <div class="qnum">${q}</div>
+              <button class="qbtn" onclick="inc('${it.id}')">+</button>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+    }
+
+    menuArea.innerHTML = html;
+  }
+
+  function buildOrderText(){
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+    const note = document.getElementById("custNote").value.trim();
+
+    const data = MENU[currentMeal];
+    const lines = [];
+
+    for(const section in data){
+      for(const it of data[section]){
+        const q = cart[it.id] || 0;
+        if(q > 0) lines.push(`- ${it.name} x ${q}`);
+      }
+    }
+
+    const itemsText = lines.length ? lines.join("\n") : "(No items selected)";
+
+    return (
+`Ramadan Order 🌙
+Meal: ${currentMeal.toUpperCase()}
+
+Customer:
+Name: ${name || "-"}
+Phone: ${phone || "-"}
+Address: ${address || "-"}
+
+Items:
+${itemsText}
+
+Note: ${note || "-"}`
+    );
+  }
+
+  function updateSummary(){
+    totalItems.textContent = getTotalCount();
+  }
+
+  // Tabs
+  tabs.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+
+    setMeal(btn.dataset.meal);
+  });
+
+  // WhatsApp send
+  document.getElementById("sendWhatsApp").addEventListener("click", ()=>{
+    if(YOUR_WHATSAPP_NUMBER.includes("X")){
+      alert("Please set your WhatsApp number in the code: 9567717335");
+      return;
+    }
+
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+
+    if(!name || !phone || !address){
+      alert("Please enter Name, Phone, and Address.");
+      return;
+    }
+
+    // Must select at least 1 item
+    const data = MENU[currentMeal];
+    let hasItem = false;
+    for(const section in data){
+      for(const it of data[section]){
+        if((cart[it.id] || 0) > 0) { hasItem = true; break; }
+      }
+      if(hasItem) break;
+    }
+    if(!hasItem){
+      alert("Please select at least 1 item using + button.");
+      return;
+    }
+
+    const text = buildOrderText();
+    const waUrl = `https://wa.me/${9567717335}?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, "_blank");
+  });
+
+  // Copy order text
+  document.getElementById("copyText").addEventListener("click", async ()=>{
+    const text = buildOrderText();
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("Order text copied ✅");
+    }catch{
+      alert("Copy failed. Here is the text:\n\n" + text);
+    }
+  });
+
+  // Clear
+  document.getElementById("clearAll").addEventListener("click", ()=>{
+    for(const k in cart) delete cart[k];
+    document.getElementById("custName").value = "";
+    document.getElementById("custPhone").value = "";
+    document.getElementById("custAddress").value = "";
+    document.getElementById("custNote").value = "";
+    renderMenu();
+    updateSummary();
+  });
+
+  // expose for onclick
+  window.inc = inc;
+  window.dec = dec;
+
+  // init
+  renderMenu();
+  updateSummary();
+</script>
+
+</body>
+</html>
