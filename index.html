@@ -19,18 +19,16 @@
       --border:1px solid rgba(0,0,0,.10);
       --radius:16px;
     }
-
     *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: Arial, sans-serif;
       color:var(--text);
-      background: radial-gradient(1200px 500px at 10% 0%, var(--bg2), transparent),
-                  radial-gradient(1200px 500px at 90% 0%, #fff0d6, transparent),
-                  var(--bg1);
+      background:
+        radial-gradient(1200px 500px at 10% 0%, var(--bg2), transparent),
+        radial-gradient(1200px 500px at 90% 0%, #fff0d6, transparent),
+        var(--bg1);
     }
-
-    /* Header */
     header{
       background: linear-gradient(120deg, var(--brand), var(--brand2));
       color:#fff;
@@ -44,7 +42,6 @@
     header h1{ margin:0 0 6px 0; font-size:26px; }
     header p{ margin:0; opacity:.95; }
 
-    /* Layout */
     .wrap{
       max-width: 1100px;
       margin: 0 auto;
@@ -56,7 +53,6 @@
       .wrap{ grid-template-columns: 1.35fr .65fr; }
     }
 
-    /* Cards */
     .card{
       background: var(--card);
       border-radius: var(--radius);
@@ -64,17 +60,9 @@
       border: var(--border);
       padding: 14px;
     }
-    .card h2{
-      margin:0 0 6px 0;
-      font-size:18px;
-    }
-    .sub{
-      margin:0 0 12px 0;
-      color:var(--muted);
-      font-size:13px;
-    }
+    .card h2{ margin:0 0 6px 0; font-size:18px; }
+    .sub{ margin:0 0 12px 0; color:var(--muted); font-size:13px; }
 
-    /* Tabs */
     .tabs{
       display:flex;
       gap:10px;
@@ -98,7 +86,6 @@
       box-shadow: 0 8px 18px rgba(37,211,102,.18);
     }
 
-    /* Menu sections */
     .sectionTitle{
       display:flex;
       justify-content:space-between;
@@ -108,10 +95,7 @@
     .sectionTitle h3{ margin:0; font-size:16px; }
     .sectionTitle span{ color:var(--muted); font-size:12px; }
 
-    .items{
-      display:grid;
-      gap:10px;
-    }
+    .items{ display:grid; gap:10px; }
     @media(min-width: 680px){
       .items{ grid-template-columns: 1fr 1fr; }
     }
@@ -156,14 +140,8 @@
     }
     .qbtn:hover{ transform: scale(1.03); }
     .qbtn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
+    .qnum{ width: 30px; text-align:center; font-weight: 900; }
 
-    .qnum{
-      width: 30px;
-      text-align:center;
-      font-weight: 900;
-    }
-
-    /* Summary */
     .row{
       display:flex;
       justify-content:space-between;
@@ -179,7 +157,6 @@
       font-size: 12px;
       color: var(--muted);
     }
-
     input, textarea{
       width:100%;
       padding: 11px 12px;
@@ -213,14 +190,8 @@
       flex:1;
       min-width: 220px;
     }
-    .btn.secondary{
-      background:#e2e8f0;
-      color:#0f172a;
-    }
-    .btn.danger{
-      background:#ef4444;
-      color:#fff;
-    }
+    .btn.secondary{ background:#e2e8f0; color:#0f172a; }
+    .btn.danger{ background:#ef4444; color:#fff; }
 
     .note{
       margin-top: 10px;
@@ -241,33 +212,32 @@
 </head>
 
 <body>
-
 <header>
   <h1>🌙 Ramadan Food Ordering</h1>
   <p>Iftar • Dinner • Suhur — select quantity & order on WhatsApp</p>
 </header>
 
 <div class="wrap">
-
-  <!-- LEFT: MENU -->
+  <!-- LEFT -->
   <div class="card">
     <h2 id="mealTitle">Iftar Menu</h2>
     <p class="sub">Choose a meal time, then press + / − to set quantities.</p>
 
     <div class="tabs" id="tabs">
-      <button class="tab active" data-meal="iftar">Iftar</button>
-      <button class="tab" data-meal="dinner">Dinner</button>
-      <button class="tab" data-meal="suhur">Suhur</button>
+      <button class="tab active" data-meal="iftar" type="button">Iftar</button>
+      <button class="tab" data-meal="dinner" type="button">Dinner</button>
+      <button class="tab" data-meal="suhur" type="button">Suhur</button>
     </div>
 
     <div id="menuArea"></div>
   </div>
 
-  <!-- RIGHT: SUMMARY -->
+  <!-- RIGHT -->
   <div class="card">
     <h2>Order Summary</h2>
-    <div class="row"><span>Meal Time</span><strong id="mealName">Iftar</strong></div>
-    <div class="row"><span>Total Items</span><strong id="totalItems">0</strong></div>
+    <div class="row"><span>Current Meal</span><strong id="mealName">Iftar</strong></div>
+    <div class="row"><span>Items in This Meal</span><strong id="totalItems">0</strong></div>
+    <div class="row"><span>Items in Full Day</span><strong id="totalAll">0</strong></div>
 
     <label>Your Name</label>
     <input id="custName" placeholder="Enter your name" />
@@ -282,17 +252,17 @@
     <input id="custNote" placeholder="Eg: less spicy / extra gravy" />
 
     <div class="actions">
-      <button class="btn primary" id="sendWhatsApp">Send Order on WhatsApp</button>
-      <button class="btn secondary" id="copyText">Copy Order Text</button>
-      <button class="btn danger" id="clearAll">Clear</button>
+      <button class="btn primary" id="sendWhatsApp" type="button">Send This Meal</button>
+      <button class="btn primary" id="sendAllMeals" type="button">Send Full Day Order</button>
+      <button class="btn secondary" id="copyText" type="button">Copy This Meal Text</button>
+      <button class="btn danger" id="clearAll" type="button">Clear This Meal</button>
     </div>
 
     <div class="note">
-      ✅ No Google Form needed. Customer order goes directly to your WhatsApp.<br/>
+      ✅ Full Day Order includes Iftar + Dinner + Suhur together in one WhatsApp message.<br/>
       🔧 Change your WhatsApp number in the code (one line).
     </div>
   </div>
-
 </div>
 
 <footer>
@@ -300,13 +270,10 @@
 </footer>
 
 <script>
-  // ✅ CHANGE THIS to your WhatsApp number (country code + number, no spaces)
-  // Example India: "919876543210"
-  const YOUR_WHATSAPP_NUMBER = "9567717335";
+  // ✅ CHANGE THIS (example India: "919876543210")
+  const YOUR_WHATSAPP_NUMBER = "91XXXXXXXXXX";
 
-  // MENU:
-  // ✅ IFTAR = cut fruits + juice + snacks
-  // ✅ DINNER and SUHUR = same menu (breads + curries + fresh juice)
+  // ✅ DINNER MENU (SAME FOR SUHUR)
   const DINNER_MENU = {
     "Breads": [
       { id:"appam", name:"Appam", desc:"Soft Kerala appam" },
@@ -326,6 +293,7 @@
     ]
   };
 
+  // ✅ IFTAR MENU
   const MENU = {
     iftar: {
       "Cut Fruits": [
@@ -346,23 +314,23 @@
         { id:"snack_roll", name:"Roll", desc:"Chicken / veg roll" },
       ]
     },
-
     dinner: DINNER_MENU,
-
-    // ✅ SAME as dinner
     suhur: DINNER_MENU
   };
 
+  // ✅ Separate carts per meal
+  const cartByMeal = { iftar:{}, dinner:{}, suhur:{} };
   let currentMeal = "iftar";
-  const cart = {}; // itemId -> qty
 
   const tabs = document.getElementById("tabs");
   const menuArea = document.getElementById("menuArea");
   const mealName = document.getElementById("mealName");
   const mealTitle = document.getElementById("mealTitle");
   const totalItems = document.getElementById("totalItems");
+  const totalAll = document.getElementById("totalAll");
 
   function titleCase(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+  function getCart(){ return cartByMeal[currentMeal]; }
 
   function setMeal(meal){
     currentMeal = meal;
@@ -373,12 +341,14 @@
   }
 
   function inc(id){
+    const cart = getCart();
     cart[id] = (cart[id] || 0) + 1;
     renderMenu();
     updateSummary();
   }
 
   function dec(id){
+    const cart = getCart();
     const next = Math.max(0, (cart[id] || 0) - 1);
     if(next === 0) delete cart[id];
     else cart[id] = next;
@@ -386,12 +356,21 @@
     updateSummary();
   }
 
-  function getTotalCount(){
+  function countCart(cart){
     return Object.values(cart).reduce((a,b)=>a+b,0);
+  }
+
+  function getTotalCount(){
+    return countCart(getCart());
+  }
+
+  function getTotalAllMeals(){
+    return countCart(cartByMeal.iftar) + countCart(cartByMeal.dinner) + countCart(cartByMeal.suhur);
   }
 
   function renderMenu(){
     const data = MENU[currentMeal];
+    const cart = getCart();
     let html = "";
 
     for(const section in data){
@@ -413,9 +392,9 @@
               <p>${it.desc}</p>
             </div>
             <div class="qty">
-              <button class="qbtn" ${q===0 ? "disabled": ""} onclick="dec('${it.id}')">−</button>
+              <button class="qbtn" ${q===0 ? "disabled": ""} onclick="dec('${it.id}')" type="button">−</button>
               <div class="qnum">${q}</div>
-              <button class="qbtn" onclick="inc('${it.id}')">+</button>
+              <button class="qbtn" onclick="inc('${it.id}')" type="button">+</button>
             </div>
           </div>
         `;
@@ -423,17 +402,12 @@
 
       html += `</div>`;
     }
-
     menuArea.innerHTML = html;
   }
 
-  function buildOrderText(){
-    const name = document.getElementById("custName").value.trim();
-    const phone = document.getElementById("custPhone").value.trim();
-    const address = document.getElementById("custAddress").value.trim();
-    const note = document.getElementById("custNote").value.trim();
-
-    const data = MENU[currentMeal];
+  function buildMealItemsText(mealKey){
+    const data = MENU[mealKey];
+    const cart = cartByMeal[mealKey];
     const lines = [];
 
     for(const section in data){
@@ -442,8 +416,16 @@
         if(q > 0) lines.push(`- ${it.name} x ${q}`);
       }
     }
+    return lines.length ? lines.join("\n") : "(No items selected)";
+  }
 
-    const itemsText = lines.length ? lines.join("\n") : "(No items selected)";
+  function buildThisMealText(){
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+    const note = document.getElementById("custNote").value.trim();
+
+    const itemsText = buildMealItemsText(currentMeal);
 
     return (
 `Ramadan Order 🌙
@@ -461,11 +443,42 @@ Note: ${note || "-"}`
     );
   }
 
-  function updateSummary(){
-    totalItems.textContent = getTotalCount();
+  function buildFullDayOrderText(){
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+    const note = document.getElementById("custNote").value.trim();
+
+    const iftarText  = buildMealItemsText("iftar");
+    const dinnerText = buildMealItemsText("dinner");
+    const suhurText  = buildMealItemsText("suhur");
+
+    return (
+`Ramadan Full Day Order 🌙
+
+Customer:
+Name: ${name || "-"}
+Phone: ${phone || "-"}
+Address: ${address || "-"}
+
+IFTAR:
+${iftarText}
+
+DINNER:
+${dinnerText}
+
+SUHUR:
+${suhurText}
+
+Note: ${note || "-"}`
+    );
   }
 
-  // Tabs
+  function updateSummary(){
+    totalItems.textContent = getTotalCount();
+    totalAll.textContent = getTotalAllMeals();
+  }
+
   tabs.addEventListener("click", (e)=>{
     const btn = e.target.closest(".tab");
     if(!btn) return;
@@ -476,10 +489,9 @@ Note: ${note || "-"}`
     setMeal(btn.dataset.meal);
   });
 
-  // WhatsApp send
   document.getElementById("sendWhatsApp").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
-      alert("Please set your WhatsApp number in the code: 9567717335");
+      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
       return;
     }
 
@@ -492,28 +504,49 @@ Note: ${note || "-"}`
       return;
     }
 
-    // Must select at least 1 item
-    const data = MENU[currentMeal];
-    let hasItem = false;
-    for(const section in data){
-      for(const it of data[section]){
-        if((cart[it.id] || 0) > 0) { hasItem = true; break; }
-      }
-      if(hasItem) break;
-    }
-    if(!hasItem){
-      alert("Please select at least 1 item using + button.");
+    const cart = getCart();
+    if(Object.keys(cart).length === 0){
+      alert("Please select at least 1 item in this meal using + button.");
       return;
     }
 
-    const text = buildOrderText();
-    const waUrl = `https://wa.me/${9567717335}?text=${encodeURIComponent(text)}`;
+    const text = buildThisMealText();
+    const waUrl = `https://wa.me/${YOUR_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, "_blank");
   });
 
-  // Copy order text
+  document.getElementById("sendAllMeals").addEventListener("click", ()=>{
+    if(YOUR_WHATSAPP_NUMBER.includes("X")){
+      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
+      return;
+    }
+
+    const name = document.getElementById("custName").value.trim();
+    const phone = document.getElementById("custPhone").value.trim();
+    const address = document.getElementById("custAddress").value.trim();
+
+    if(!name || !phone || !address){
+      alert("Please enter Name, Phone, and Address.");
+      return;
+    }
+
+    const hasAny =
+      Object.keys(cartByMeal.iftar).length > 0 ||
+      Object.keys(cartByMeal.dinner).length > 0 ||
+      Object.keys(cartByMeal.suhur).length > 0;
+
+    if(!hasAny){
+      alert("Please select at least 1 item in Iftar/Dinner/Suhur.");
+      return;
+    }
+
+    const text = buildFullDayOrderText();
+    const waUrl = `https://wa.me/${YOUR_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, "_blank");
+  });
+
   document.getElementById("copyText").addEventListener("click", async ()=>{
-    const text = buildOrderText();
+    const text = buildThisMealText();
     try{
       await navigator.clipboard.writeText(text);
       alert("Order text copied ✅");
@@ -522,12 +555,8 @@ Note: ${note || "-"}`
     }
   });
 
-  // Clear
   document.getElementById("clearAll").addEventListener("click", ()=>{
-    for(const k in cart) delete cart[k];
-    document.getElementById("custName").value = "";
-    document.getElementById("custPhone").value = "";
-    document.getElementById("custAddress").value = "";
+    cartByMeal[currentMeal] = {};
     document.getElementById("custNote").value = "";
     renderMenu();
     updateSummary();
@@ -541,6 +570,5 @@ Note: ${note || "-"}`
   renderMenu();
   updateSummary();
 </script>
-
 </body>
 </html>
