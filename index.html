@@ -116,6 +116,13 @@
     .info h4{ margin:0 0 4px 0; font-size:15px; }
     .info p{ margin:0; font-size:12px; color:var(--muted); }
 
+    .priceLine{
+      font-size:12px;
+      font-weight:900;
+      color:#0b3b22;
+      margin-top:6px;
+    }
+
     .qty{
       display:flex;
       align-items:center;
@@ -124,7 +131,7 @@
       background: #f1f5f9;
       padding: 8px;
       border-radius: 14px;
-      min-width: 128px;
+      min-width: 140px;
     }
     .qbtn{
       border:none;
@@ -238,6 +245,7 @@
     <div class="row"><span>Current Meal</span><strong id="mealName">Iftar</strong></div>
     <div class="row"><span>Items in This Meal</span><strong id="totalItems">0</strong></div>
     <div class="row"><span>Items in Full Day</span><strong id="totalAll">0</strong></div>
+    <div class="row"><span>Total Amount</span><strong id="totalPrice">₹0</strong></div>
 
     <label>Your Name</label>
     <input id="custName" placeholder="Enter your name" />
@@ -259,7 +267,7 @@
     </div>
 
     <div class="note">
-      ✅ Full Day Order includes Iftar + Dinner + Suhur together in one WhatsApp message.<br/>
+      ✅ Prices & totals are included. Full Day Order includes Iftar + Dinner + Suhur together.<br/>
       🔧 Change your WhatsApp number in the code (one line).
     </div>
   </div>
@@ -271,47 +279,47 @@
 
 <script>
   // ✅ CHANGE THIS (example India: "919876543210")
-  const YOUR_WHATSAPP_NUMBER = "9567717335";
+  const YOUR_WHATSAPP_NUMBER = "91XXXXXXXXXX";
 
-  // ✅ DINNER MENU (SAME FOR SUHUR)
+  // ✅ DINNER MENU (SAME FOR SUHUR) — prices in ₹
   const DINNER_MENU = {
     "Breads": [
-      { id:"appam", name:"Appam", desc:"Soft Kerala appam" },
-      { id:"chapati", name:"Chapati", desc:"Fresh homemade chapati" },
-      { id:"porotta", name:"Porotta", desc:"Kerala style flaky porotta" },
-      { id:"idiyappam", name:"Idiyappam", desc:"Soft steamed string hoppers" },
-      { id:"puttu", name:"Puttu", desc:"Traditional Kerala puttu" },
+      { id:"appam", name:"Appam", desc:"Soft Kerala appam", price: 15 },
+      { id:"chapati", name:"Chapati", desc:"Fresh homemade chapati", price: 12 },
+      { id:"porotta", name:"Porotta", desc:"Kerala style flaky porotta", price: 20 },
+      { id:"idiyappam", name:"Idiyappam", desc:"Soft steamed string hoppers", price: 18 },
+      { id:"puttu", name:"Puttu", desc:"Traditional Kerala puttu", price: 25 },
     ],
     "Curries": [
-      { id:"chickencurry", name:"Chicken Curry", desc:"Spicy homemade chicken curry" },
-      { id:"butterchicken", name:"Butter Chicken", desc:"Creamy butter chicken masala" },
-      { id:"beefcurry", name:"Beef Curry", desc:"Kerala style beef curry" },
-      { id:"eggcurry", name:"Egg Curry", desc:"Traditional egg masala curry" },
+      { id:"chickencurry", name:"Chicken Curry", desc:"Spicy homemade chicken curry", price: 120 },
+      { id:"butterchicken", name:"Butter Chicken", desc:"Creamy butter chicken masala", price: 140 },
+      { id:"beefcurry", name:"Beef Curry", desc:"Kerala style beef curry", price: 130 },
+      { id:"eggcurry", name:"Egg Curry", desc:"Traditional egg masala curry", price: 60 },
     ],
     "Drinks": [
-      { id:"freshjuice", name:"Fresh Juice", desc:"Mango / Orange / Lime & more" }
+      { id:"freshjuice", name:"Fresh Juice", desc:"Mango / Orange / Lime & more", price: 50 }
     ]
   };
 
-  // ✅ IFTAR MENU
+  // ✅ IFTAR MENU — prices in ₹
   const MENU = {
     iftar: {
       "Cut Fruits": [
-        { id:"cut_apple", name:"Cut Apple", desc:"Fresh apple slices" },
-        { id:"cut_banana", name:"Cut Banana", desc:"Fresh banana slices" },
-        { id:"cut_watermelon", name:"Watermelon", desc:"Fresh watermelon cubes" },
-        { id:"cut_mix", name:"Mixed Fruit Bowl", desc:"Apple + banana + watermelon mix" },
+        { id:"cut_apple", name:"Cut Apple", desc:"Fresh apple slices", price: 40 },
+        { id:"cut_banana", name:"Cut Banana", desc:"Fresh banana slices", price: 30 },
+        { id:"cut_watermelon", name:"Watermelon", desc:"Fresh watermelon cubes", price: 35 },
+        { id:"cut_mix", name:"Mixed Fruit Bowl", desc:"Apple + banana + watermelon mix", price: 50 },
       ],
       "Juice": [
-        { id:"juice_mango", name:"Mango Juice", desc:"Fresh mango juice" },
-        { id:"juice_orange", name:"Orange Juice", desc:"Fresh orange juice" },
-        { id:"juice_lime", name:"Lime Juice", desc:"Fresh lime juice" },
+        { id:"juice_mango", name:"Mango Juice", desc:"Fresh mango juice", price: 60 },
+        { id:"juice_orange", name:"Orange Juice", desc:"Fresh orange juice", price: 55 },
+        { id:"juice_lime", name:"Lime Juice", desc:"Fresh lime juice", price: 40 },
       ],
       "Snacks": [
-        { id:"snack_samosa", name:"Samosa", desc:"Crispy & tasty" },
-        { id:"snack_cutlet", name:"Cutlet", desc:"Veg / chicken cutlet" },
-        { id:"snack_pakora", name:"Pakora", desc:"Evening snack special" },
-        { id:"snack_roll", name:"Roll", desc:"Chicken / veg roll" },
+        { id:"snack_samosa", name:"Samosa", desc:"Crispy & tasty", price: 15 },
+        { id:"snack_cutlet", name:"Cutlet", desc:"Veg / chicken cutlet", price: 20 },
+        { id:"snack_pakora", name:"Pakora", desc:"Evening snack special", price: 25 },
+        { id:"snack_roll", name:"Roll", desc:"Chicken / veg roll", price: 50 },
       ]
     },
     dinner: DINNER_MENU,
@@ -328,6 +336,7 @@
   const mealTitle = document.getElementById("mealTitle");
   const totalItems = document.getElementById("totalItems");
   const totalAll = document.getElementById("totalAll");
+  const totalPriceEl = document.getElementById("totalPrice");
 
   function titleCase(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
   function getCart(){ return cartByMeal[currentMeal]; }
@@ -368,6 +377,24 @@
     return countCart(cartByMeal.iftar) + countCart(cartByMeal.dinner) + countCart(cartByMeal.suhur);
   }
 
+  function getMealTotal(mealKey){
+    const data = MENU[mealKey];
+    const cart = cartByMeal[mealKey];
+    let total = 0;
+
+    for(const section in data){
+      for(const it of data[section]){
+        const qty = cart[it.id] || 0;
+        total += qty * (it.price || 0);
+      }
+    }
+    return total;
+  }
+
+  function getFullDayTotal(){
+    return getMealTotal("iftar") + getMealTotal("dinner") + getMealTotal("suhur");
+  }
+
   function renderMenu(){
     const data = MENU[currentMeal];
     const cart = getCart();
@@ -385,11 +412,14 @@
 
       for(const it of items){
         const q = cart[it.id] || 0;
+        const lineTotal = q * (it.price || 0);
+
         html += `
           <div class="item">
             <div class="info">
               <h4>${it.name}</h4>
               <p>${it.desc}</p>
+              <div class="priceLine">₹${it.price} each • Subtotal: ₹${lineTotal}</div>
             </div>
             <div class="qty">
               <button class="qbtn" ${q===0 ? "disabled": ""} onclick="dec('${it.id}')" type="button">−</button>
@@ -409,14 +439,23 @@
     const data = MENU[mealKey];
     const cart = cartByMeal[mealKey];
     const lines = [];
+    let total = 0;
 
     for(const section in data){
       for(const it of data[section]){
-        const q = cart[it.id] || 0;
-        if(q > 0) lines.push(`- ${it.name} x ${q}`);
+        const qty = cart[it.id] || 0;
+        if(qty > 0){
+          const line = qty * it.price;
+          total += line;
+          lines.push(`- ${it.name} x ${qty} (₹${it.price} each) = ₹${line}`);
+        }
       }
     }
-    return lines.length ? lines.join("\n") : "(No items selected)";
+
+    return {
+      text: lines.length ? lines.join("\n") : "(No items selected)",
+      total
+    };
   }
 
   function buildThisMealText(){
@@ -425,7 +464,7 @@
     const address = document.getElementById("custAddress").value.trim();
     const note = document.getElementById("custNote").value.trim();
 
-    const itemsText = buildMealItemsText(currentMeal);
+    const mealData = buildMealItemsText(currentMeal);
 
     return (
 `Ramadan Order 🌙
@@ -437,7 +476,9 @@ Phone: ${phone || "-"}
 Address: ${address || "-"}
 
 Items:
-${itemsText}
+${mealData.text}
+
+Meal Total: ₹${mealData.total}
 
 Note: ${note || "-"}`
     );
@@ -449,9 +490,11 @@ Note: ${note || "-"}`
     const address = document.getElementById("custAddress").value.trim();
     const note = document.getElementById("custNote").value.trim();
 
-    const iftarText  = buildMealItemsText("iftar");
-    const dinnerText = buildMealItemsText("dinner");
-    const suhurText  = buildMealItemsText("suhur");
+    const iftar = buildMealItemsText("iftar");
+    const dinner = buildMealItemsText("dinner");
+    const suhur = buildMealItemsText("suhur");
+
+    const grand = iftar.total + dinner.total + suhur.total;
 
     return (
 `Ramadan Full Day Order 🌙
@@ -462,13 +505,18 @@ Phone: ${phone || "-"}
 Address: ${address || "-"}
 
 IFTAR:
-${iftarText}
+${iftar.text}
+Iftar Total: ₹${iftar.total}
 
 DINNER:
-${dinnerText}
+${dinner.text}
+Dinner Total: ₹${dinner.total}
 
 SUHUR:
-${suhurText}
+${suhur.text}
+Suhur Total: ₹${suhur.total}
+
+GRAND TOTAL: ₹${grand}
 
 Note: ${note || "-"}`
     );
@@ -477,6 +525,7 @@ Note: ${note || "-"}`
   function updateSummary(){
     totalItems.textContent = getTotalCount();
     totalAll.textContent = getTotalAllMeals();
+    totalPriceEl.textContent = "₹" + getFullDayTotal();
   }
 
   tabs.addEventListener("click", (e)=>{
@@ -491,7 +540,7 @@ Note: ${note || "-"}`
 
   document.getElementById("sendWhatsApp").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
-      alert("Please set your WhatsApp number in code: 9567717335");
+      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
       return;
     }
 
@@ -517,7 +566,7 @@ Note: ${note || "-"}`
 
   document.getElementById("sendAllMeals").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
-      alert("Please set your WhatsApp number in code: 9567717335");
+      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
       return;
     }
 
@@ -541,7 +590,7 @@ Note: ${note || "-"}`
     }
 
     const text = buildFullDayOrderText();
-    const waUrl = `https://wa.me/${9567717335}?text=${encodeURIComponent(text)}`;
+    const waUrl = `https://wa.me/${YOUR_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, "_blank");
   });
 
