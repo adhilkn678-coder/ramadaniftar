@@ -233,7 +233,7 @@
 <body>
 <header>
   <h1>🌙 Ramadan Food Ordering</h1>
-  <p>Iftar • Dinner • Suhur — select quantity • prices • GPS • distance • WhatsApp order</p>
+  <p>Iftar • Dinner • Suhur — prices • GPS • distance • pre-order • WhatsApp order</p>
 </header>
 
 <div class="wrap">
@@ -266,6 +266,10 @@
     <label>Phone Number</label>
     <input id="custPhone" placeholder="Enter phone number" />
 
+    <label>Delivery Date (Pre-order required)</label>
+    <input type="date" id="deliveryDate" />
+    <div class="note" style="margin-top:6px;">✅ Orders must be placed at least 1 day before delivery.</div>
+
     <label>Select Your Location</label>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
       <button class="btn secondary" id="useMyLocation" type="button">📍 Use My Current Location</button>
@@ -288,8 +292,9 @@
 
     <div class="note">
       ✅ Map picker + GPS auto-detect + distance calculation included.<br/>
-      ✅ Prices & totals are included in WhatsApp message.<br/>
-      🔧 Change WhatsApp number + your shop location in the code.
+      ✅ Pre-order rule: delivery date must be at least tomorrow.<br/>
+      ✅ Prices & totals included in WhatsApp message.<br/>
+      🔧 Change WhatsApp number + shop location in the code.
     </div>
   </div>
 </div>
@@ -300,12 +305,12 @@
 
 <script>
   // ✅ CHANGE THIS (example India: "919876543210")
-  const YOUR_WHATSAPP_NUMBER = "9567717335";
+  const YOUR_WHATSAPP_NUMBER = "91XXXXXXXXXX";
 
   // ✅ SET YOUR SHOP LOCATION (CHANGE THESE)
-  const SHOP_NAME = "shainy's kitchen";
-  const SHOP_LAT = 10.033965;   // <-- Put your shop latitude
-  const SHOP_LNG = 76.312313;   // <-- Put your shop longitude
+  const SHOP_NAME = "My Ramadan Kitchen";
+  const SHOP_LAT = 10.8505;   // <-- Put your shop latitude
+  const SHOP_LNG = 76.2711;   // <-- Put your shop longitude
 
   // ✅ DINNER MENU (SAME FOR SUHUR) — prices in ₹
   const DINNER_MENU = {
@@ -364,6 +369,38 @@
   const totalAll = document.getElementById("totalAll");
   const totalPriceEl = document.getElementById("totalPrice");
   const distanceTextEl = document.getElementById("distanceText");
+
+  // ---------- Pre-order date (tomorrow min) ----------
+  function setMinDeliveryDate(){
+    const dateInput = document.getElementById("deliveryDate");
+    const now = new Date();
+    now.setDate(now.getDate() + 1); // tomorrow
+
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+    if(!dateInput.value) dateInput.value = dateInput.min;
+  }
+
+  function validatePreOrderDate(){
+    const val = document.getElementById("deliveryDate").value;
+    if(!val){
+      alert("Please select delivery date.");
+      return false;
+    }
+    const selected = new Date(val + "T00:00:00");
+    const min = new Date();
+    min.setHours(0,0,0,0);
+    min.setDate(min.getDate() + 1); // tomorrow
+
+    if(selected < min){
+      alert("❌ Pre-order required: Please select a delivery date at least 1 day from today.");
+      return false;
+    }
+    return true;
+  }
 
   // ---------- Helpers ----------
   function titleCase(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -490,7 +527,8 @@
   function getDeliveryInfoText(){
     const addr = document.getElementById("custAddress").value.trim();
     const dist = distanceTextEl.textContent;
-    return `Address:\n${addr || "-"}\nDistance: ${dist}`;
+    const delDate = document.getElementById("deliveryDate").value;
+    return `Delivery Date: ${delDate || "-"}\nAddress:\n${addr || "-"}\nDistance: ${dist}`;
   }
 
   function buildThisMealText(){
@@ -581,6 +619,7 @@ Note: ${note || "-"}`
       alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
       return;
     }
+    if(!validatePreOrderDate()) return;
 
     const name = document.getElementById("custName").value.trim();
     const phone = document.getElementById("custPhone").value.trim();
@@ -604,9 +643,10 @@ Note: ${note || "-"}`
 
   document.getElementById("sendAllMeals").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
-      alert("Please set your WhatsApp number in code: 9567717335");
+      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
       return;
     }
+    if(!validatePreOrderDate()) return;
 
     const name = document.getElementById("custName").value.trim();
     const phone = document.getElementById("custPhone").value.trim();
@@ -654,7 +694,6 @@ Note: ${note || "-"}`
   window.dec = dec;
 
   // ---------- MAP + GPS + DISTANCE ----------
-  // Haversine distance (km)
   function haversineKm(lat1, lon1, lat2, lon2){
     const R = 6371;
     const toRad = (x) => x * Math.PI / 180;
@@ -682,14 +721,12 @@ Note: ${note || "-"}`
     distanceTextEl.textContent = km.toFixed(2) + " km";
   }
 
-  // Map init (center at shop)
   const map = L.map('map').setView([SHOP_LAT, SHOP_LNG], 12);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
   }).addTo(map);
 
-  // Shop marker
   L.marker([SHOP_LAT, SHOP_LNG]).addTo(map).bindPopup(`🏪 ${SHOP_NAME}`).openPopup();
 
   let marker;
@@ -740,6 +777,8 @@ Note: ${note || "-"}`
 
   // Auto detect on load (asks permission)
   window.addEventListener("load", ()=>{
+    setMinDeliveryDate();
+
     if(!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos)=>{ setCustomerLocation(pos.coords.latitude, pos.coords.longitude); },
