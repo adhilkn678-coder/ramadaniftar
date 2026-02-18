@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ramadan Food Ordering</title>
 
+  <!-- ✅ Map (Free) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
   <style>
     :root{
       --bg1:#fff8e1;
@@ -175,6 +179,14 @@
     }
     textarea{ min-height: 90px; resize:vertical; }
 
+    #map{
+      height: 300px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0,0,0,.10);
+      overflow:hidden;
+    }
+
     .actions{
       display:flex;
       gap:10px;
@@ -221,7 +233,7 @@
 <body>
 <header>
   <h1>🌙 Ramadan Food Ordering</h1>
-  <p>Iftar • Dinner • Suhur — select quantity & order on WhatsApp</p>
+  <p>Iftar • Dinner • Suhur — select quantity • prices • GPS • distance • WhatsApp order</p>
 </header>
 
 <div class="wrap">
@@ -246,6 +258,7 @@
     <div class="row"><span>Items in This Meal</span><strong id="totalItems">0</strong></div>
     <div class="row"><span>Items in Full Day</span><strong id="totalAll">0</strong></div>
     <div class="row"><span>Total Amount</span><strong id="totalPrice">₹0</strong></div>
+    <div class="row"><span>Delivery Distance</span><strong id="distanceText">0 km</strong></div>
 
     <label>Your Name</label>
     <input id="custName" placeholder="Enter your name" />
@@ -253,8 +266,15 @@
     <label>Phone Number</label>
     <input id="custPhone" placeholder="Enter phone number" />
 
-    <label>Address</label>
-    <textarea id="custAddress" placeholder="Enter delivery address"></textarea>
+    <label>Select Your Location</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <button class="btn secondary" id="useMyLocation" type="button">📍 Use My Current Location</button>
+    </div>
+
+    <div id="map"></div>
+
+    <label>Selected Address (auto from map)</label>
+    <textarea id="custAddress" placeholder="Click on map or use GPS button"></textarea>
 
     <label>Note (optional)</label>
     <input id="custNote" placeholder="Eg: less spicy / extra gravy" />
@@ -267,8 +287,9 @@
     </div>
 
     <div class="note">
-      ✅ Prices & totals are included. Full Day Order includes Iftar + Dinner + Suhur together.<br/>
-      🔧 Change your WhatsApp number in the code (one line).
+      ✅ Map picker + GPS auto-detect + distance calculation included.<br/>
+      ✅ Prices & totals are included in WhatsApp message.<br/>
+      🔧 Change WhatsApp number + your shop location in the code.
     </div>
   </div>
 </div>
@@ -279,7 +300,12 @@
 
 <script>
   // ✅ CHANGE THIS (example India: "919876543210")
-  const YOUR_WHATSAPP_NUMBER = "91XXXXXXXXXX";
+  const YOUR_WHATSAPP_NUMBER = "9567717335";
+
+  // ✅ SET YOUR SHOP LOCATION (CHANGE THESE)
+  const SHOP_NAME = "shainy's kitchen";
+  const SHOP_LAT = 10.033965;   // <-- Put your shop latitude
+  const SHOP_LNG = 76.312313;   // <-- Put your shop longitude
 
   // ✅ DINNER MENU (SAME FOR SUHUR) — prices in ₹
   const DINNER_MENU = {
@@ -337,7 +363,9 @@
   const totalItems = document.getElementById("totalItems");
   const totalAll = document.getElementById("totalAll");
   const totalPriceEl = document.getElementById("totalPrice");
+  const distanceTextEl = document.getElementById("distanceText");
 
+  // ---------- Helpers ----------
   function titleCase(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
   function getCart(){ return cartByMeal[currentMeal]; }
 
@@ -381,7 +409,6 @@
     const data = MENU[mealKey];
     const cart = cartByMeal[mealKey];
     let total = 0;
-
     for(const section in data){
       for(const it of data[section]){
         const qty = cart[it.id] || 0;
@@ -395,6 +422,7 @@
     return getMealTotal("iftar") + getMealTotal("dinner") + getMealTotal("suhur");
   }
 
+  // ---------- Render Menu ----------
   function renderMenu(){
     const data = MENU[currentMeal];
     const cart = getCart();
@@ -435,6 +463,7 @@
     menuArea.innerHTML = html;
   }
 
+  // ---------- Build WhatsApp Text ----------
   function buildMealItemsText(mealKey){
     const data = MENU[mealKey];
     const cart = cartByMeal[mealKey];
@@ -447,7 +476,7 @@
         if(qty > 0){
           const line = qty * it.price;
           total += line;
-          lines.push(`- ${it.name} x ${qty} (₹${it.price} each) = ₹${line}`);
+          lines.push(`- ${it.name} x ${qty} (₹${it.price}) = ₹${line}`);
         }
       }
     }
@@ -458,10 +487,15 @@
     };
   }
 
+  function getDeliveryInfoText(){
+    const addr = document.getElementById("custAddress").value.trim();
+    const dist = distanceTextEl.textContent;
+    return `Address:\n${addr || "-"}\nDistance: ${dist}`;
+  }
+
   function buildThisMealText(){
     const name = document.getElementById("custName").value.trim();
     const phone = document.getElementById("custPhone").value.trim();
-    const address = document.getElementById("custAddress").value.trim();
     const note = document.getElementById("custNote").value.trim();
 
     const mealData = buildMealItemsText(currentMeal);
@@ -473,7 +507,8 @@ Meal: ${currentMeal.toUpperCase()}
 Customer:
 Name: ${name || "-"}
 Phone: ${phone || "-"}
-Address: ${address || "-"}
+
+${getDeliveryInfoText()}
 
 Items:
 ${mealData.text}
@@ -487,7 +522,6 @@ Note: ${note || "-"}`
   function buildFullDayOrderText(){
     const name = document.getElementById("custName").value.trim();
     const phone = document.getElementById("custPhone").value.trim();
-    const address = document.getElementById("custAddress").value.trim();
     const note = document.getElementById("custNote").value.trim();
 
     const iftar = buildMealItemsText("iftar");
@@ -502,7 +536,8 @@ Note: ${note || "-"}`
 Customer:
 Name: ${name || "-"}
 Phone: ${phone || "-"}
-Address: ${address || "-"}
+
+${getDeliveryInfoText()}
 
 IFTAR:
 ${iftar.text}
@@ -526,8 +561,10 @@ Note: ${note || "-"}`
     totalItems.textContent = getTotalCount();
     totalAll.textContent = getTotalAllMeals();
     totalPriceEl.textContent = "₹" + getFullDayTotal();
+    // distanceTextEl updated by map functions
   }
 
+  // ---------- Tabs ----------
   tabs.addEventListener("click", (e)=>{
     const btn = e.target.closest(".tab");
     if(!btn) return;
@@ -538,6 +575,7 @@ Note: ${note || "-"}`
     setMeal(btn.dataset.meal);
   });
 
+  // ---------- Buttons ----------
   document.getElementById("sendWhatsApp").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
       alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
@@ -549,7 +587,7 @@ Note: ${note || "-"}`
     const address = document.getElementById("custAddress").value.trim();
 
     if(!name || !phone || !address){
-      alert("Please enter Name, Phone, and Address.");
+      alert("Please enter Name, Phone, and choose location/address.");
       return;
     }
 
@@ -566,7 +604,7 @@ Note: ${note || "-"}`
 
   document.getElementById("sendAllMeals").addEventListener("click", ()=>{
     if(YOUR_WHATSAPP_NUMBER.includes("X")){
-      alert("Please set your WhatsApp number in code: YOUR_WHATSAPP_NUMBER");
+      alert("Please set your WhatsApp number in code: 9567717335");
       return;
     }
 
@@ -575,7 +613,7 @@ Note: ${note || "-"}`
     const address = document.getElementById("custAddress").value.trim();
 
     if(!name || !phone || !address){
-      alert("Please enter Name, Phone, and Address.");
+      alert("Please enter Name, Phone, and choose location/address.");
       return;
     }
 
@@ -615,7 +653,102 @@ Note: ${note || "-"}`
   window.inc = inc;
   window.dec = dec;
 
-  // init
+  // ---------- MAP + GPS + DISTANCE ----------
+  // Haversine distance (km)
+  function haversineKm(lat1, lon1, lat2, lon2){
+    const R = 6371;
+    const toRad = (x) => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  let selectedLat = null;
+  let selectedLng = null;
+
+  function updateDistanceUI(){
+    if(selectedLat == null || selectedLng == null){
+      distanceTextEl.textContent = "0 km";
+      return;
+    }
+    const km = haversineKm(SHOP_LAT, SHOP_LNG, selectedLat, selectedLng);
+    distanceTextEl.textContent = km.toFixed(2) + " km";
+  }
+
+  // Map init (center at shop)
+  const map = L.map('map').setView([SHOP_LAT, SHOP_LNG], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // Shop marker
+  L.marker([SHOP_LAT, SHOP_LNG]).addTo(map).bindPopup(`🏪 ${SHOP_NAME}`).openPopup();
+
+  let marker;
+
+  function setCustomerLocation(lat, lng){
+    selectedLat = lat;
+    selectedLng = lng;
+
+    if(marker) map.removeLayer(marker);
+
+    marker = L.marker([lat, lng]).addTo(map).bindPopup("📍 Your Location").openPopup();
+    map.setView([lat, lng], 15);
+
+    updateDistanceUI();
+
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then(r => r.json())
+      .then(data => {
+        const addr = data?.display_name || `Lat: ${lat}, Lng: ${lng}`;
+        document.getElementById("custAddress").value =
+          `${addr}\nGoogle Maps: https://www.google.com/maps?q=${lat},${lng}\nDistance: ${distanceTextEl.textContent}`;
+      })
+      .catch(() => {
+        document.getElementById("custAddress").value =
+          `Lat: ${lat}, Lng: ${lng}\nGoogle Maps: https://www.google.com/maps?q=${lat},${lng}\nDistance: ${distanceTextEl.textContent}`;
+      });
+  }
+
+  map.on('click', (e)=>{
+    setCustomerLocation(e.latlng.lat, e.latlng.lng);
+  });
+
+  document.getElementById("useMyLocation").addEventListener("click", ()=>{
+    if(!navigator.geolocation){
+      alert("GPS not supported in this browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{
+        setCustomerLocation(pos.coords.latitude, pos.coords.longitude);
+      },
+      ()=>{
+        alert("Could not get GPS location. Please allow location permission or click on map.");
+      },
+      { enableHighAccuracy:true, timeout:10000 }
+    );
+  });
+
+  // Auto detect on load (asks permission)
+  window.addEventListener("load", ()=>{
+    if(!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos)=>{ setCustomerLocation(pos.coords.latitude, pos.coords.longitude); },
+      ()=>{},
+      { enableHighAccuracy:true, timeout:6000 }
+    );
+  });
+
+  // ---------- INIT ----------
   renderMenu();
   updateSummary();
 </script>
